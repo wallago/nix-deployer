@@ -14,10 +14,17 @@
         pkgs = import nixpkgs { inherit system overlays; };
         rust = pkgs.rust-bin.nightly.latest.default;
       in {
+        packages.default = pkgs.rustPlatform.buildRustPackage {
+          name = "nix-deployer";
+          src = ./..;
+          cargoLock = { lockFile = ../Cargo.lock; };
+          nativeBuildInputs = [ pkgs.pkg-config ];
+          buildInputs = [ pkgs.openssl ];
+        };
         devShells = {
           default = pkgs.mkShell {
-            buildInputs = with pkgs;
-              [ pkg-config openssl rust-analyzer ] ++ [ rust ];
+            nativeBuildInputs = [ pkgs.pkg-config ];
+            buildInputs = with pkgs; [ openssl rust-analyzer ] ++ [ rust ];
             shellHook = ''
               echo "
               🐚 Rust dev shell ready!
