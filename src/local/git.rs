@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
 use anyhow::{Context, Result, anyhow};
 use dialoguer::{Input, Select, theme::ColorfulTheme};
@@ -21,7 +24,7 @@ impl Repo {
                 info!("📂 Get nix-config git repository ");
                 let path = Input::with_theme(&ColorfulTheme::default())
                     .with_prompt("Enter nix-config path:")
-                    .default("nixos".to_string())
+                    .default(env::current_dir()?.display().to_string())
                     .allow_empty(false)
                     .show_default(true)
                     .interact_text()?;
