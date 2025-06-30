@@ -16,13 +16,23 @@ impl super::Host {
 
         info!("🚀 Deploying nix-config via nixos-rebuild");
         let repo = self.get_repo()?;
+
+        let build_on_target = match Confirm::with_theme(&ColorfulTheme::default())
+            .with_prompt("Do you want to build on target?")
+            .interact()?
+        {
+            true => format!(" --target-host {}@{}", repo.host, user,),
+            false => format!(""),
+        };
+
         let command = format!(
-            "NIX_SSHOPTS=\"-A -p {}\" nixos-rebuild switch --flake {}#{} --target-host {}@{} --use-substitutes --sudo --ask-sudo-password",
+            "NIX_SSHOPTS=\"-A -p {}\" nixos-rebuild switch --flake {}#{} --target-host {}@{} --use-substitutes --sudo --ask-sudo-password {}",
             port,
             repo.path.display(),
             repo.host,
             user,
             destination,
+            build_on_target
         );
         tracing::info!("🔸 {command}");
         loop {
