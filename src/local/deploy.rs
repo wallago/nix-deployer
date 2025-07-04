@@ -21,7 +21,7 @@ impl super::Host {
             .with_prompt("Do you want to build on target?")
             .interact()?
         {
-            true => format!(" --target-host {}@{}", repo.host, user,),
+            true => format!(" --build-host {}@{}", user, destination),
             false => format!(""),
         };
 
