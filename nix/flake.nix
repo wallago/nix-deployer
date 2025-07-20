@@ -1,5 +1,5 @@
 {
-  description = "Nix dev environment";
+  description = "Nixos deployer tool";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
