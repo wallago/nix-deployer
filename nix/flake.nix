@@ -5,9 +5,10 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     rust-overlay.url = "github:oxalica/rust-overlay";
+    project-banner.url = "github:wallago/project-banner?dir=nix";
   };
 
-  outputs = { nixpkgs, flake-utils, rust-overlay, ... }:
+  outputs = { nixpkgs, flake-utils, rust-overlay, project-banner, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
@@ -26,9 +27,12 @@
             nativeBuildInputs = [ pkgs.pkg-config ];
             buildInputs = with pkgs; [ openssl rust-analyzer ] ++ [ rust ];
             shellHook = ''
-              echo "
-              🐚 Rust dev shell ready!
-              Run: cargo build / cargo test / etc."
+              ${project-banner.packages.${system}.default}/bin/project-banner \
+                --owner "wallago" \
+                --logo " 󰖌 " \
+                --product "nix-deployer" \
+                --part "CLI" \
+                --code "WL25-NIXD-CL01" \
             '';
           };
         };
