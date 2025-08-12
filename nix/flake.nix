@@ -1,5 +1,5 @@
 {
-  description = "Nix dev environment";
+  description = "Nixos deployer tool";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -14,18 +14,21 @@
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs { inherit system overlays; };
         rust = pkgs.rust-bin.nightly.latest.default;
+        commonNativeBuildInputs = with pkgs; [ pkg-config ];
+        commonBuildInputs = with pkgs; [ openssl ];
       in {
         packages.default = pkgs.rustPlatform.buildRustPackage {
           name = "nix-deployer";
           src = ./..;
           cargoLock = { lockFile = ../Cargo.lock; };
-          nativeBuildInputs = [ pkgs.pkg-config ];
-          buildInputs = [ pkgs.openssl ];
+          nativeBuildInputs = commonNativeBuildInputs;
+          buildInputs = commonBuildInputs;
         };
         devShells = {
           default = pkgs.mkShell {
-            nativeBuildInputs = [ pkgs.pkg-config ];
-            buildInputs = with pkgs; [ openssl rust-analyzer ] ++ [ rust ];
+            nativeBuildInputs = commonNativeBuildInputs;
+            buildInputs = with pkgs;
+              [ rust-analyzer ] ++ [ rust ] ++ commonBuildInputs;
             shellHook = ''
               ${project-banner.packages.${system}.default}/bin/project-banner \
                 --owner "wallago" \
