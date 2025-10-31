@@ -38,7 +38,7 @@ fn main() -> Result<()> {
         .default(if cfg.ssh_destination.is_empty() {
             "127.0.0.1".into()
         } else {
-            cfg.ssh_user.clone()
+            cfg.ssh_destination.clone()
         })
         .allow_empty(false)
         .show_default(true)
