@@ -2,6 +2,7 @@ use anyhow::Result;
 use dialoguer::{Input, theme::ColorfulTheme};
 use tracing::{info, warn};
 
+mod config;
 mod helpers;
 mod local;
 
@@ -20,21 +21,35 @@ fn main() -> Result<()> {
         local.set_nix_config(false)?;
     }
 
+    let mut cfg = config::DeployConfig::load()?;
+
     let user = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Enter ssh user:")
-        .default("nixos".to_string())
+        .default(if cfg.ssh_user.is_empty() {
+            "nixos".into()
+        } else {
+            cfg.ssh_user.clone()
+        })
         .allow_empty(false)
         .show_default(true)
         .interact_text()?;
     let destination = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Enter ssh destination:")
-        .default("127.0.0.1".to_string())
+        .default(if cfg.ssh_destination.is_empty() {
+            "127.0.0.1".into()
+        } else {
+            cfg.ssh_user.clone()
+        })
         .allow_empty(false)
         .show_default(true)
         .interact_text()?;
     let port = Input::with_theme(&ColorfulTheme::default())
         .with_prompt("Enter ssh port (1-65535):")
-        .default("22".to_string())
+        .default(if cfg.ssh_port.is_empty() {
+            "22".into()
+        } else {
+            cfg.ssh_port.clone()
+        })
         .allow_empty(false)
         .show_default(true)
         .validate_with(|input: &String| -> Result<(), &str> {
@@ -51,7 +66,11 @@ fn main() -> Result<()> {
         })
         .interact_text()?;
 
-    local.deploy_nixos_rebuild(&user, &destination, &port)?;
+    cfg.ssh_user = user.clone();
+    cfg.ssh_destination = destination.clone();
+    cfg.ssh_port = port.clone();
+    cfg.save()?;
 
+    local.deploy_nixos_rebuild(&user, &destination, &port)?;
     Ok(info!("🚀 Reboot your remote host and enjoy !"))
 }
